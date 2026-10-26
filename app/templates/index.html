@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b16">
+  <title>Secure Records API | Playground</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="{{ url_for('static', filename='playground.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Secure Records API home">
+      <span class="brand-mark" aria-hidden="true">SR</span>
+      <span>Nestack <span class="brand-light">RECORDS SYSTEM</span></span>
+    </a>
+    <div class="connection"><span class="pulse"></span><span>Backend connected</span><span id="backend-host" class="host">{{ request.host }}</span></div>
+  </header>
+
+  <main class="page">
+    <section class="intro">
+      <p class="eyebrow">LOCAL DEVELOPMENT / REQUEST DESK</p>
+      <h1>The Records <span>Desk</span></h1>
+      <p class="intro-copy">Work through the API one step at a time. Requests and responses stay visible as you move between account and record actions.</p>
+      <div class="flow" aria-label="Request processing flow">
+        <div class="flow-step is-active" data-step="0" aria-current="step"><span class="flow-number">01</span><span>Request</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step" data-step="1"><span class="flow-number">02</span><span>Validate</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step" data-step="2"><span class="flow-number">03</span><span>Authenticate</span></div><span class="flow-arrow">→</span>
+        <div class="flow-step" data-step="3"><span class="flow-number">04</span><span>Enforce ownership</span></div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <aside class="inspector" aria-label="Backend activity">
+        <div class="inspector-head"><div><p class="eyebrow">REQUEST LOG</p><h2>Backend activity</h2></div><span class="live-badge"><i></i><span id="backend-state" aria-live="polite">READY</span></span></div>
+        <p class="inspector-copy">HTTP requests and responses from this page.</p>
+        <div id="activity-list" class="activity-list" aria-live="polite">
+          <div class="empty-state"><strong>No requests yet</strong><span>Register or sign in to begin.</span></div>
+        </div>
+        <div class="response-box">
+          <div class="response-title"><span>LAST RESPONSE</span><span id="response-status" class="status-pill">—</span></div>
+          <pre id="response-body">{
+  "status": "ready",
+  "hint": "Submit an action to see its response"
+}</pre>
+        </div>
+        <div class="inspector-foot"><span class="footer-dot"></span>Request bodies are validated by the backend before storage.</div>
+      </aside>
+
+      <section class="controls" aria-label="API controls">
+        <div class="tab-bar" role="tablist" aria-label="API walkthrough sections">
+          <button id="tab-account" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="panel-account" tabindex="0">Account access <span>01</span></button>
+          <button id="tab-records" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-records" tabindex="-1">Records <span>02</span></button>
+        </div>
+
+        <section id="panel-account" class="tab-panel" role="tabpanel" aria-labelledby="tab-account">
+          <div class="section-heading"><div><p class="eyebrow">YOUR SESSION</p><h2>Account access</h2></div><span class="step-tag">01 — IDENTITY</span></div>
+          <div class="auth-grid">
+            <form id="register-form" class="card form-card">
+            <div class="card-heading"><span class="icon icon-user" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.3"/><path d="M3.5 19c.4-3.2 2.2-5 5.5-5s5.1 1.8 5.5 5M18 8v7m-3.5-3.5h7"/></svg></span><div><h3>Register</h3><p>Creates a regular user account.</p></div></div>
+              <label>Username<input name="username" autocomplete="username" minlength="3" maxlength="32" placeholder="e.g. raven_user" required></label>
+              <label>Password<input name="password" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="At least 12 characters" required></label>
+              <button type="submit" class="button button-secondary">Register <span>→</span></button>
+            </form>
+
+            <form id="login-form" class="card form-card">
+            <div class="card-heading"><span class="icon icon-key" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 2 2-2 2 2 2-3 3-2-2-3 3"/></svg></span><div><h3>Log in</h3><p>Returns a bearer session token.</p></div></div>
+              <label>Username<input name="username" autocomplete="username" minlength="3" maxlength="32" placeholder="Your username" required></label>
+              <label>Password<input name="password" type="password" autocomplete="current-password" minlength="1" maxlength="128" placeholder="Your password" required></label>
+              <button type="submit" class="button button-primary">Login <span>→</span></button>
+            </form>
+          </div>
+          <div id="session-banner" class="session-banner signed-out"><span class="session-dot"></span><span id="session-text">No active session. Log in to create or read records.</span><button id="logout-button" class="text-button" type="button" hidden>Log out</button></div>
+        </section>
+
+        <section id="panel-records" class="tab-panel" role="tabpanel" aria-labelledby="tab-records" hidden>
+          <div class="section-heading"><div><p class="eyebrow">OWNED DATA</p><h2>Records</h2></div><span class="step-tag">02 — OBJECT ACCESS</span></div>
+          <div class="auth-grid">
+            <form id="create-form" class="card form-card">
+              <div class="card-heading"><span class="icon icon-record" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20H6zM14 3.5V8h4M9 12h6M9 16h6"/></svg></span><div><h3>Create a record</h3><p>Ownership comes from your session.</p></div></div>
+              <label>Title<input name="title" maxlength="200" placeholder="A private note" required></label>
+              <label>Body<textarea name="body" maxlength="10000" rows="3" placeholder="Record contents" required></textarea></label>
+              <button type="submit" class="button button-primary" data-auth-action>Create record <span>→</span></button>
+            </form>
+
+            <form id="read-form" class="card form-card">
+              <div class="card-heading"><span class="icon icon-lock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.5-2.8 7.8-7 10-4.2-2.2-7-5.5-7-10V6z"/><rect x="9" y="10" width="6" height="5" rx="1"/><path d="M10.5 10V8.5a1.5 1.5 0 0 1 3 0V10"/></svg></span><div><h3>Read by ID</h3><p>Access is checked for each request.</p></div></div>
+              <label>Record ID<input id="record-id" name="id" placeholder="Create a record first" required></label>
+              <div class="access-note"><span class="access-check">✓</span><span>Owners can read their records. Admin access is assigned by the server operator.</span></div>
+              <button type="submit" class="button button-primary" data-auth-action>Read record <span>→</span></button>
+            </form>
+          </div>
+          <p class="privacy-note"><span aria-hidden="true">◇</span> Session token stays in this tab’s memory and is cleared when you log out or reload.</p>
+        </section>
+      </section>
+    </div>
+
+    <footer><span>Local development</span><span>Session token is held in tab memory.</span></footer>
+  </main>
+</body>
+</html>
